@@ -22,20 +22,20 @@ const typeDefs = gql`
     street: String
     city: String
     country: String
-    latitude: String
-    longitude: String
+    latitude: Float
+    longitude: Float
   }
   input AddressInput {
     street: String
     city: String
     country: String
-    latitude: String
-    longitude: String
+    latitude: Float
+    longitude: Float
   }
   extend type Query {
     getPlaceById(id: ID!): Place
     getListPlaces(
-      limit: String!
+      limit: Int!
       lastDoc: String
       direction: String
       searchText: String
@@ -68,7 +68,11 @@ const resolvers = {
     getPlaceById: async (parent, { id }) => {
       try {
         const placeRef = await db.doc(`/places/${id}`).get();
-        return placeRef.data();
+        const result = {
+          id: placeRef.id,
+          ...placeRef.data(),
+        };
+        return result;
       } catch (error) {
         return error;
       }
@@ -79,12 +83,12 @@ const resolvers = {
         let last;
         placeRef = db.collection("places");
 
-        if (args.searchText) {
+        if (args.searchText && args.searchText !== "") {
           placeRef = placeRef.where("name", "==", args.searchText);
         }
 
-        if (args.lastDoc) {
-          last = await db.collection("places").doc(lastDoc).get();
+        if (args.lastDoc && args.lastDoc !== "") {
+          last = await db.collection("places").doc(args.lastDoc).get();
           if (args.direction === "fwd") {
             placeRef = placeRef.startAfter(last);
           } else {
@@ -92,11 +96,16 @@ const resolvers = {
           }
         }
 
-        placeRef = placeRef.limit(parseInt(args.limit));
+        placeRef = placeRef.limit(args.limit);
 
         placeRef = await placeRef.get();
 
-        const result = placeRef.docs.map((place) => place.data());
+        const result = placeRef.docs.map((place) => {
+          return {
+            id: place.id,
+            ...place.data(),
+          };
+        });
 
         return result;
       } catch (error) {
@@ -122,8 +131,8 @@ const resolvers = {
             street: address.street,
             city: address.city,
             country: address.country,
-            latitude: parseFloat(address.latitude),
-            longitude: parseFloat(address.longitude),
+            latitude: address.latitude,
+            longitude: address.longitude,
           },
         });
 
@@ -137,12 +146,7 @@ const resolvers = {
       try {
         const docId = args.id;
         delete args.id;
-        if (args.address && args.address.latitude) {
-          args.address.latitude = parseFloat(args.address.latitude);
-        }
-        if (args.address && args.address.longitude) {
-          args.address.longitude = parseFloat(args.address.longitude);
-        }
+
         const new_place = db.collection("places").doc(docId);
 
         await new_place.set({ ...args }, { merge: true });
