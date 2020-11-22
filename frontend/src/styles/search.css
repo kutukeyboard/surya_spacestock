@@ -94,6 +94,13 @@
   text-align: center;
 }
 
+.resultText {
+  position: absolute;
+  font-size: 30px;
+  top: 50%;
+  left: 50%;
+}
+
 @media only screen and (max-width: 600px) {
   .mapContent {
     display: none;

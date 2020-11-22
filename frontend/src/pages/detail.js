@@ -100,7 +100,9 @@ const DetailPage = () => {
 
           {arrayImage.map((item) => {
             return (
-              <img src={item} key={item} className="carouselImage" alt="" />
+              <a href={item} key={item}>
+                <img src={item} className="carouselImage" alt="" />
+              </a>
             );
           })}
 

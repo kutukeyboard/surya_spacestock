@@ -75,13 +75,14 @@ const SearchPage = () => {
   const handleSearch = () => {
     setSearchText(sInput.current.value);
   };
-  if (loading) return <p>Loading ...</p>;
-  if (error) return <p>ooops ...</p>;
+  if (loading) return <p className="resultText">Loading ...</p>;
+  if (error) return <p className="resultText">ooops ...</p>;
 
   return (
     <div>
       <div className="searchbar">
         <select id="searchTypeSelect">
+          <option>All</option>
           <option>Apartment</option>
           <option>Office</option>
         </select>
@@ -96,7 +97,7 @@ const SearchPage = () => {
           GO
         </button>
       </div>
-      {data.getListPlaces.length > 0 && (
+      {data.getListPlaces.length > 0 ? (
         <div className="content">
           <div className="leftContent">
             <div className="cardContent">
@@ -135,6 +136,8 @@ const SearchPage = () => {
             <Maps data={data.getListPlaces} multiple={true} />
           </div>
         </div>
+      ) : (
+        <p className="resultText">No Data...</p>
       )}
     </div>
   );
